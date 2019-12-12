@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <title>Property Based Testing</title>
+
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/reveal.css" />
+    <link rel="stylesheet" href="css/theme/night.css" />
+    <link rel="stylesheet" href="lib/css/monokai.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Property Based Testing</h2>
+          <p>Michał Kaczanowicz</p>
+        </section>
+
+        <section>
+          <h3>Tests!</h3>
+          <p class="fragment">(in order of appearance)</p>
+          <ol>
+            <li class="fragment">
+              No tests (you can't fail a test if you don't have any, right?
+              ¯\_(ツ)_/¯)
+            </li>
+            <li class="fragment">
+              Acceptance tests (by client - don't point out what exactly went
+              wrong, by programmer - take way too much time)
+            </li>
+            <li class="fragment">
+              Unit tests (often impossible to cover all cases in practice)
+            </li>
+            <li class="fragment">
+              Fuzz tests (don't really check corectness, only some kind of
+              "fault-tolerance" on random input)
+            </li>
+            <li class="fragment">... ?</li>
+          </ol>
+        </section>
+
+        <section>
+          <h3>Example - square root</h3>
+          <pre><code class="hljs">
+expect(sqrt(0)).toEqual(0)
+expect(sqrt(4)).toEqual(2)
+expect(sqrt(9)).toEqual(3)
+// ...
+expect(sqrt(256)).toEqual(16)
+          </code></pre>
+          <p>
+            <span class="fragment">All tests green, ship it... </span
+            ><span class="fragment">CRASH!</span>
+          </p>
+          <pre><code class="hljs fragment">
+// TODO: Fix for all cases
+function sqrt(x) {
+    switch(x) {
+        case 0: return 0
+        case 4: return 2
+        case 9: return 3
+        case 256: return 16
+        default: return -1
+    }
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Evil enterprise developer?</h3>
+          <p class="fragment">Know one...</p>
+          <img
+            class="fragment"
+            src="./assets/evil-enterprise-developer.jpeg"
+            alt="Evil enterprise developer"
+          />
+        </section>
+
+        <section>
+          <h5>How to deal with it?</h5>
+          <h5 class="fragment">Don't write tests!</h5>
+          <h3 class="fragment"><em>Generate them</em></h3>
+        </section>
+
+        <section>
+          <h5>General approach</h5>
+          <pre><code class="hljs javascript">
+for(let i = 0; i < 100; i++) {
+    const x = randomNonNegativeNumber()
+    expect(sqrt(x)).toEqual(???)
+}
+          </code></pre>
+          <h5 class="fragment">
+            But we'd need another, correct implementation of
+            <code>sqrt()</code>!
+          </h5>
+          <h5 class="fragment">... well sometimes we have one</h5>
+        </section>
+
+        <section>
+          <h3>Oracle test [1/3]</h3>
+          <pre><code class="hljs javascript">
+for(let i = 0; i < 100; i++) {
+    const x = randomNonNegativeNumber()
+    // Disregarded precision issues for simplicity sake
+    expect(sqrt(x)).toEqual(Math.sqrt(x))
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Oracle test [2/3] - why would we do that?</h3>
+          <p>
+            Oracle test is often used in case there exists a simpler
+            implementation, easy to write and make sure it works correctly, but
+            for some reason not fullfilling our expectations (e.g. performance,
+            totality)
+          </p>
+          <pre><code class="hljs javascript">
+for(let i = 0; i < 100; i++) {
+    const maxLength = randomNonNegativeInteger(1000)
+    const xs = randomArrayOfNumbers(maxLength)
+    expect(quickSort(xs)).toEqual(selectionSort(xs))
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Oracle test [3/3]</h3>
+          <p>
+            Fun fact - we don't need this another implementation to be strictly
+            <em>correct</em>. We can make two unsure implementations
+            cross-verify one another! (but this will make debugging harder,
+            since in case of differing results we don't know which one to trust)
+          </p>
+          <pre><code class="hljs javascript">
+for(let i = 0; i < 100; i++) {
+    const maxLength = randomNonNegativeInteger(1000)
+    const xs = randomArrayOfNumbers(maxLength)
+    expect(quickSort(xs)).toEqual(heapSort(xs))
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h5>What if we don't have another implementation (quite often)?</h5>
+          <div class="fragment">
+            <h5>Property for square root</h5>
+            $$ \forall_{x \geq 0}: y = \sqrt{x} \implies y^2 = x $$
+          </div>
+
+          <pre class="fragment"><code class="hljs javascript">
+for(let i = 0; i < 100; i++) {
+    const x = randomNonNegativeNumber()
+    const y = sqrt(x)
+    expect(y*y).toEqual(x)
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>How to search for properties?</h3>
+          <h5>A few patterns</h5>
+        </section>
+
+        <section>
+          <h3>"There and back again"</h3>
+
+          $$ (f \cdot f^{-1})(x) = x $$
+
+          <div class="fragment">
+            <h5>Useful for:</h5>
+            <ul>
+              <li>Conversions</li>
+              <li>Serialization/deserialization</li>
+              <li>Write/read</li>
+            </ul>
+          </div>
+        </section>
+
+        <section>
+          <h3>"More than one way"</h3>
+
+          $$ f \cdot g \equiv g \cdot f $$
+          <pre class="fragment"><code class="hljs javascript">
+xs.sort().map(x => x + 1) === xs.map(x => x + 1).sort()
+          </code></pre>
+          <pre class="fragment"><code class="hljs javascript">
+// sorting than reversing is the same
+// as sorting in the dual order
+reverse(xs.sort((a, b) => a - b)) ===
+    xs.sort((a, b) => b - a)
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>"Some things never change" - invariants</h3>
+
+          $$ P(x) \implies P(f(x)) $$
+          <pre class="fragment"><code class="hljs javascript">
+xs.sort().length === xs.length
+          </code></pre>
+          <pre class="fragment"><code class="hljs javascript">
+countElementsIn(xs.sort()) === countElementsIn(xs)
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Idempotence</h3>
+
+          $$ f \cdot f \equiv f $$
+          <pre class="fragment"><code class="hljs javascript">
+xs.sort() === xs.sort().sort()
+          </code></pre>
+          <pre class="fragment"><code class="hljs javascript">
+distinct(xs) === distinct(distinct(xs))
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>"Hard to find, easy to verify"</h3>
+
+          $$ C(f(C, x)) $$
+          <p>where $C$ - some constraints</p>
+          <pre class="fragment"><code class="hljs javascript">
+// imagine some CAD software,
+// generating grid obeying to some
+// predefined conditions
+
+checkGeometry(
+    constraints,
+    // input - e.g. optimality
+    generateGeometry(constraints, input)
+)
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Problem-specific properties [1/2]</h3>
+
+          <pre><code class="hljs javascript">
+// sliding: [1, 3, 4, 19] => [[1, 3], [3, 4], [4, 19]]
+
+// Sorted array has elements in
+// non-decreasing order
+sliding(xs.sort(), 2).every(([x1, x2]) => x1 <= x2)
+          </code></pre>
+
+          <pre class="fragment"><code class="hljs javascript">
+// Distinct numbers, sorted, have adjacent
+// elements non-equal
+
+// Sorting is crucial - otherwise [3, 4, 3]
+// would pass the test (make sure `sort` is correct!)
+sliding(distinct(xs).sort(), 2)
+    .every(([x1, x2]) => x1 !== x2)
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Problem-specific properties [2/2]</h3>
+
+          <pre><code class="hljs javascript">
+// sometimes it's handy to assert
+// some condition on input data
+
+[...xs, Number.NEGATIVE_INFINITY].sort()[0] ===
+    Number.NEGATIVE_INFINITY
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>Model-based testing</h3>
+
+          <h5>
+            Simplified model of our system, preserving some invariants (e.g.
+            queue vs model, holding number of elements in the queue)
+          </h5>
+
+          <pre><code class="hljs javascript">
+// E.g. ["ENQUEUE", "ENQUEUE", "DEQUEUE", etc.]
+for(let apiCall of apiCallGenerator()) {
+    // e.g. Add element to queue
+    performApiCallOnActualSystem(apiCall)
+    // e.g. Increase model by 1
+    performApiCallOnModel(apiCall)
+    // e.g. queue.size() === model
+    checkInvariants(actualSystem, model)
+}
+          </code></pre>
+        </section>
+
+        <section>
+          <h3>
+            PBT in real world [1/2]
+          </h3>
+          <ul>
+            <li>
+              John Hughes, working on embedded car systems for Volvo (high
+              efficiency and reliability in a distributed, concurrent
+              environment)
+            </li>
+            <li class="fragment">
+              Over 1 milion lines of C code from several contractors
+            </li>
+            <li class="fragment">
+              Created QuickCheck (Haskell, "contract-like" specifications:
+              precondition, action, postcondition), wrote about 20 000 lines of
+              specifications (discover several errors and inconsistencies in
+              spec along the way!)
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h3>
+            PBT in real world [2/2]
+          </h3>
+          <img src="./assets/hughes.png" alt="John Hughes" />
+          <a href="https://www.youtube.com/watch?v=zi0rHwfiX1Q"
+            >(Link to video)</a
+          >
+        </section>
+
+        <section>
+          <h3>Shrinking</h3>
+          <h5>
+            Given potentially thousands of api calls that eventually caused an
+            error, how to tell which are the relevant ones?
+          </h5>
+
+          <pre><code class="hljs javascript">
+A - B - A - A - D - E - A - C - D - B - A
+
+// shrinking algorithm in testing framework...
+
+_ - _ - A - A - _ - _ - _ - C - _ - _ - _
+          </code></pre>
+        </section>
+
+        <section>
+          <h3><code>fast-check</code></h3>
+          <img
+            src="./assets/fast-check-npm.png"
+            alt="fast-check npm installs"
+          />
+          <pre><code class="hljs javascript">
+import * as fc from "fast-check";
+
+test("inverting array twice goes back to initial value", () => {
+    fc.assert(
+        fc.property(fc.array(fc.integer()), 
+        arrayOfInts => {
+            const reversed = reverse(reverse(arrayOfInts))
+            expect(arrayOfInts).toEqual(reversed);
+        })
+    );
+});
+          </code></pre>
+        </section>
+
+        <section>
+          <p>Random generators are nicely composable</p>
+          <pre><code class="hljs javascript">
+import * as fc from "fast-check";
+
+fc.integer()  // integer
+fc.option(fc.integer())  // integer | null
+fc.array(fc.option(fc.integer()))  // (integer | null)[]
+
+// { name: string, grades: (integer | null)[] }
+fc.record({
+    name: fc.string(),
+    grades: fc.array(fc.option(fc.integer()))
+})
+
+          </code></pre>
+
+          <a
+            href="https://github.com/dubzzz/fast-check/blob/master/documentation/1-Guides/Arbitraries.md"
+            >(Full list of available generators)</a
+          >
+        </section>
+
+        <section>
+          <h3>Live demo</h3>
+          <p>Is JavaScript a strict language?</p>
+        </section>
+
+        <section>
+          <h3>Frameworks available for various languages:</h3>
+          <ol>
+            <li>Haskell - QuickCheck</li>
+            <li>TS/JS - fast-check</li>
+            <li>Python - Hypothesis</li>
+            <li>Scala - ScalaCheck</li>
+          </ol>
+        </section>
+
+        <section>
+          <blockquote>
+            <p>
+              Program testing can be used to show the presence of bugs, but
+              never to show their absence...
+            </p>
+            <p class="fragment">
+              ... but PBT can be used to show their unlikliness.
+            </p>
+          </blockquote>
+        </section>
+
+        <section>
+          <h3>Extra: could the compiler do that for us?</h3>
+        </section>
+        <section data-background="http://i.giphy.com/90F8aUepslB84.gif">
+          <h3>YES!</h3>
+          <h5 class="fragment">... well, sometimes</h5>
+        </section>
+
+        <section>
+          <p>
+            There exist languages with type system so advanced (e.g.
+            <em>dependent types</em>), that we can express interesting
+            invariants directly in it. One of them is
+            <a href="https://www.idris-lang.org/"><em>Idris</em></a
+            >:
+          </p>
+
+          <pre><code class="hljs haskell">
+partition : (a -> Bool) ->
+    Vect (m+n) a -> (Vect m a, Vect n a)
+          </code></pre>
+
+          In fact, given these constraints, often it can even
+          <em>generate</em> some implementation for us!
+        </section>
+
+        <section>
+          <h3>Bibliography</h3>
+          <ol>
+            <li>
+              Introduction to property-based testing - article,
+              <a
+                href="https://fsharpforfunandprofit.com/posts/property-based-testing/"
+                >pt. 1</a
+              >
+              and
+              <a
+                href="https://fsharpforfunandprofit.com/posts/property-based-testing-2/"
+                >pt. 2</a
+              >
+            </li>
+            <li>
+              Mentioned
+              <a href="https://www.youtube.com/watch?v=zi0rHwfiX1Q">video</a>,
+              by
+              <a
+                href="https://en.wikipedia.org/wiki/John_Hughes_(computer_scientist)"
+                >co-inventor of QuickCheck</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/dubzzz/fast-check/blob/master/documentation/1-Guides/IssuesDiscovered.md"
+                >Errors discovered using fast-check</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://www.youtube.com/watch?v=GigiViV-GFk&feature=youtu.be"
+                >PBT: from theory to practice</a
+              >
+              - speech given by creator of
+              <code>fast-check</code>
+            </li>
+            <li>
+              Video
+              <a href="https://www.youtube.com/watch?v=X36ye-1x_HQ"
+                >"Type-driven development in Idris"</a
+              >
+              by <a href="https://github.com/edwinb">Edwin Brady</a>, its
+              creator
+            </li>
+          </ol>
+        </section>
+      </div>
+    </div>
+
+    <script src="js/reveal.js"></script>
+
+    <script>
+      // More info about config & dependencies:
+      // - https://github.com/hakimel/reveal.js#configuration
+      // - https://github.com/hakimel/reveal.js#dependencies
+      Reveal.initialize({
+        dependencies: [
+          { src: "plugin/markdown/marked.js" },
+          { src: "plugin/markdown/markdown.js" },
+          { src: "plugin/notes/notes.js", async: true },
+          { src: "plugin/highlight/highlight.js", async: true },
+          { src: "plugin/math/math.js", async: true },
+          { src: "plugin/zoom-js/zoom.js", async: true }
+        ],
+        math: {
+          // mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: "TeX-AMS_HTML-full",
+          TeX: {
+            Macros: {
+              R: "\\mathbb{R}",
+              set: ["\\left\\{#1 \\; ; \\; #2\\right\\}", 2]
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
