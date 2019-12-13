@@ -73,19 +73,26 @@ function sqrt(x) {
         </section>
 
         <section>
-          <h3>Evil enterprise developer?</h3>
-          <p class="fragment">Know one...</p>
-          <img
-            class="fragment"
-            src="./assets/evil-enterprise-developer.jpeg"
-            alt="Evil enterprise developer"
-          />
+          <h3>No one in the Universe would code it like this!</h3>
+          <ul>
+            <li class="fragment">Forgot to update when a new case arose</li>
+            <li class="fragment">Ignorance of spec, laziness ;)</li>
+            <li class="fragment">
+              Legacy code with no tests (in fact, that's how
+              <em>whole PBT idea was born</em> in the first place!)
+            </li>
+          </ul>
         </section>
 
         <section>
           <h5>How to deal with it?</h5>
           <h5 class="fragment">Don't write tests!</h5>
           <h3 class="fragment"><em>Generate them</em></h3>
+          <h5 class="fragment">
+            <a href="https://www.youtube.com/watch?v=1t-gK-9EIq4"
+              >... best in large amounts</a
+            >
+          </h5>
         </section>
 
         <section>
@@ -152,8 +159,13 @@ for(let i = 0; i < 100; i++) {
           <h5>What if we don't have another implementation (quite often)?</h5>
           <div class="fragment">
             <h5>Property for square root</h5>
-            $$ \forall_{x \geq 0}: y = \sqrt{x} \implies y^2 = x $$
+            <p>$$ \forall_{x \geq 0}: y = \sqrt{x} \implies y^2 = x$$</p>
           </div>
+
+          <p class="fragment">
+            $$ \forall_{x \geq 0, y \geq 0}: y^2 \neq x \implies y \neq \sqrt{x}
+            $$
+          </p>
 
           <pre class="fragment"><code class="hljs javascript">
 for(let i = 0; i < 100; i++) {
@@ -226,7 +238,7 @@ distinct(xs) === distinct(distinct(xs))
         <section>
           <h3>"Hard to find, easy to verify"</h3>
 
-          $$ C(f(C, x)) $$
+          $$ C(f(C, x), x) $$
           <p>where $C$ - some constraints</p>
           <pre class="fragment"><code class="hljs javascript">
 // imagine some CAD software,
@@ -235,7 +247,6 @@ distinct(xs) === distinct(distinct(xs))
 
 checkGeometry(
     constraints,
-    // input - e.g. optimality
     generateGeometry(constraints, input)
 )
           </code></pre>
@@ -407,12 +418,16 @@ fc.record({
           <blockquote>
             <p>
               Program testing can be used to show the presence of bugs, but
-              never to show their absence...
+              never to show their absence
             </p>
-            <p class="fragment">
-              ... but PBT can be used to show their unlikliness.
-            </p>
+            <p>~ Dijkstra</p>
           </blockquote>
+          <p class="fragment">
+            but PBT can be used to show their unlikliness
+          </p>
+          <p class="fragment">
+            and besides it captures the specification of our code!
+          </p>
         </section>
 
         <section>
@@ -444,8 +459,8 @@ partition : (a -> Bool) ->
         <section>
           <h3>Bibliography</h3>
           <ol>
-            <li>
-              Introduction to property-based testing - article,
+            <li class="fragment">
+              "Introduction to property-based testing" - article,
               <a
                 href="https://fsharpforfunandprofit.com/posts/property-based-testing/"
                 >pt. 1</a
@@ -456,30 +471,39 @@ partition : (a -> Bool) ->
                 >pt. 2</a
               >
             </li>
-            <li>
+            <li class="fragment">
               Mentioned
-              <a href="https://www.youtube.com/watch?v=zi0rHwfiX1Q">video</a>,
-              by
+              <a href="https://www.youtube.com/watch?v=zi0rHwfiX1Q"
+                >"Testing hard stuff and staying sane"</a
+              >
+              video, by
               <a
                 href="https://en.wikipedia.org/wiki/John_Hughes_(computer_scientist)"
                 >co-inventor of QuickCheck</a
               >
             </li>
-            <li>
+            <li class="fragment">
               <a
                 href="https://github.com/dubzzz/fast-check/blob/master/documentation/1-Guides/IssuesDiscovered.md"
                 >Errors discovered using fast-check</a
               >
             </li>
-            <li>
+            <li class="fragment">
               <a
                 href="https://www.youtube.com/watch?v=GigiViV-GFk&feature=youtu.be"
-                >PBT: from theory to practice</a
+                >"PBT: from theory to practice"</a
               >
               - speech given by creator of
               <code>fast-check</code>
             </li>
-            <li>
+            <li class="fragment">
+              <a
+                href="http://backspaces.net/temp/Ebooks/FunctionalProgJavaScript/Functional_Programming_in_JavaScript.pdf"
+                >"Functional Programming in JavaScript"</a
+              >
+              - book (separate chapter on PBT)
+            </li>
+            <li class="fragment">
               Video
               <a href="https://www.youtube.com/watch?v=X36ye-1x_HQ"
                 >"Type-driven development in Idris"</a
