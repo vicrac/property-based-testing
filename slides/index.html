@@ -31,14 +31,14 @@
               ¯\_(ツ)_/¯)
             </li>
             <li class="fragment">
-              Acceptance tests (by client - don't point out what exactly went
-              wrong, by programmer - take way too much time)
+              Acceptance tests (by client - don't indicate what exactly went
+              wrong, by programmer - take way too much time/not scalable)
             </li>
             <li class="fragment">
               Unit tests (often impossible to cover all cases in practice)
             </li>
             <li class="fragment">
-              Fuzz tests (don't really check corectness, only some kind of
+              Fuzz tests (don't really check accuracy, only some kind of
               "fault-tolerance" on random input)
             </li>
             <li class="fragment">... ?</li>
@@ -74,7 +74,7 @@ function sqrt(x) {
 
         <section>
           <h3>No one in the Universe would code it like this!</h3>
-          <h5 class="fragment">... or would he though?</h5>
+          <h5 class="fragment">... or would he, though?</h5>
           <ul>
             <li class="fragment">Forgot to update when a new case arose</li>
             <li class="fragment">Hurry, ignorance of spec, laziness</li>
@@ -125,7 +125,7 @@ for(let i = 0; i < 100; i++) {
         <section>
           <h3>Oracle test [2/3] - why would we do that?</h3>
           <p>
-            Oracle test is often used in case there exists a simpler
+            Oracle test is often used when there exists a simpler
             implementation, easy to write and make sure it works correctly, but
             for some reason not fullfilling our expectations (e.g. performance,
             totality)
@@ -466,10 +466,10 @@ fc.record({
             <p>~ Dijkstra</p>
           </blockquote>
           <p class="fragment">
-            but PBT can be used to show their unlikliness
+            but PBT can be used to show their unlikliness...
           </p>
           <p class="fragment">
-            and besides it captures the specification of our code!
+            ...and besides it captures the specification of our code!
           </p>
         </section>
 
@@ -483,9 +483,9 @@ fc.record({
 
         <section>
           <p>
-            There exist languages with type system so advanced (e.g.
-            <em>dependent types</em>), that we can express interesting
-            invariants directly in it. One of them is
+            There exist languages with type systems so advanced (e.g.
+            <em>dependent types</em>) that we can often express interesting
+            invariants directly in them. One of them is
             <a href="https://www.idris-lang.org/"><em>Idris</em></a
             >:
           </p>
