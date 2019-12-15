@@ -1,0 +1,23 @@
+{
+  "name": "examples",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fp-ts": "^2.2.0",
+    "ts-node": "^8.5.4",
+    "typescript": "^3.7.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.23",
+    "fast-check": "^1.20.0",
+    "jest": "^24.9.0",
+    "ts-jest": "^24.2.0"
+  }
+}
