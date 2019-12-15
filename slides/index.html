@@ -131,9 +131,10 @@ for(let i = 0; i < 100; i++) {
             totality)
           </p>
           <pre><code class="hljs javascript">
+const MAX_LENGTH = 1000
+
 for(let i = 0; i < 100; i++) {
-    const maxLength = randomNonNegativeInteger(1000)
-    const xs = randomArrayOfNumbers(maxLength)
+    const xs = randomArrayOfNumbers(MAX_LENGTH)
     expect(quickSort(xs)).toEqual(selectionSort(xs))
 }
           </code></pre>
@@ -148,9 +149,10 @@ for(let i = 0; i < 100; i++) {
             since in case of differing results we don't know which one to trust)
           </p>
           <pre><code class="hljs javascript">
+const MAX_LENGTH = 1000
+
 for(let i = 0; i < 100; i++) {
-    const maxLength = randomNonNegativeInteger(1000)
-    const xs = randomArrayOfNumbers(maxLength)
+    const xs = randomArrayOfNumbers(MAX_LENGTH)
     expect(quickSort(xs)).toEqual(heapSort(xs))
 }
           </code></pre>
@@ -371,6 +373,11 @@ for(let apiCall of apiCallGenerator()) {
           <a href="https://www.youtube.com/watch?v=zi0rHwfiX1Q"
             >(Link to video)</a
           >
+          <aside class="notes">
+            Klarna (online payments system born in Sweden), Mnesia database,
+            dets - Erlang module for distributed fs. Who would even think of
+            including such a test case?
+          </aside>
         </section>
 
         <section>
@@ -451,10 +458,6 @@ fc.record({
             <li>Scala - ScalaCheck</li>
             <li>Rust - quickcheck</li>
           </ol>
-          <p class="fragment">
-            <a href="https://github.com/gcanti/fp-ts-laws">Package</a>
-            for generating typeclasses laws tests powered by <code>fp-ts</code>
-          </p>
         </section>
 
         <section>
