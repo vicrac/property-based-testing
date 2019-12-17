@@ -86,7 +86,7 @@ test("Reversing an array with possibly undefined values twice goes back to initi
 
 const dualCompare = (compare: Compare): Compare => (a, b) => compare(b, a);
 
-test("sorting than reversing an array is the same as sorting it in the dual order", () => {
+test("sorting then reversing an array is the same as sorting it in the dual order", () => {
   fc.assert(
     fc.property(fc.array(fc.integer()), data => {
       const sorted = [...data].sort(undefinedAtBeginningCompare);
@@ -98,7 +98,7 @@ test("sorting than reversing an array is the same as sorting it in the dual orde
   );
 });
 
-test("sorting than reversing an array with possibly undefined values is the same as sorting it in the dual order", () => {
+test("sorting then reversing an array with possibly undefined values is the same as sorting it in the dual order", () => {
   fc.assert(
     fc.property(
       fc.array(fc.oneof(fc.integer(), fc.constant(undefined))),

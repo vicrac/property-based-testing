@@ -116,7 +116,7 @@ for(let i = 0; i < 100; i++) {
           <pre><code class="hljs javascript">
 for(let i = 0; i < 100; i++) {
     const x = randomNonNegativeNumber()
-    // Disregarded precision issues for simplicity sake
+    // Disregarded precision issues for simplicity's sake
     expect(sqrt(x)).toEqual(Math.sqrt(x))
 }
           </code></pre>
@@ -210,7 +210,7 @@ for(let i = 0; i < 100; i++) {
 xs.sort().map(x => x + 1) === xs.map(x => x + 1).sort()
           </code></pre>
           <pre class="fragment"><code class="hljs javascript">
-// sorting than reversing is the same
+// sorting then reversing is the same
 // as sorting in the dual order
 reverse(xs.sort((a, b) => a - b)) ===
     xs.sort((a, b) => b - a)
@@ -248,7 +248,7 @@ distinct(xs) === distinct(distinct(xs))
           <p>where $C$ - some constraints</p>
           <pre class="fragment"><code class="hljs javascript">
 // imagine some CAD software, generating new element in
-// the grid, obeying to some predefined constraints,
+// the grid, obeying some predefined constraints,
 // e.g. grids cannot intercept
 const newGeometry = generateGeometry(
     constraints, existingGeometry
@@ -469,7 +469,7 @@ fc.record({
             <p>~ E. Dijkstra</p>
           </blockquote>
           <p class="fragment">
-            but PBT can be used to show their unlikliness...
+            but PBT can be used to show their unlikeliness...
           </p>
           <p class="fragment">
             ...and besides it captures the specification of our code!
